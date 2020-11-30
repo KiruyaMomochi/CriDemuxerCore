@@ -75,12 +75,11 @@ namespace VGMToolbox.util
         /// <returns>Byte array containing the extracted section.</returns>
         public static byte[] ParseSimpleOffset(Stream stream, long startingOffset, int lengthToCut)
         {
-            var ret = new byte[lengthToCut];
             var currentStreamPosition = stream.Position;
 
             stream.Seek(startingOffset, SeekOrigin.Begin);
-            var br = new BinaryReader(stream);
-            ret = br.ReadBytes(lengthToCut);
+            var ret = new byte[lengthToCut];
+            stream.Read(ret, 0, lengthToCut);
 
             stream.Position = currentStreamPosition;
 
@@ -191,26 +190,29 @@ namespace VGMToolbox.util
 
             var itemFound = false;
             var absoluteOffset = startingOffset;
-            long relativeOffset;
-            var checkBytes = new byte[Constants.FileReadChunkSize];
-            byte[] compareBytes;
+            int relativeOffset;
+            //var checkBytes = new byte[Constants.FileReadChunkSize];
+            Span<byte> checkSpan = stackalloc byte[Constants.FileReadChunkSize];
 
             long ret = -1;
 
             while (!itemFound && absoluteOffset < stream.Length)
             {
                 stream.Position = absoluteOffset;
-                stream.Read(checkBytes, 0, Constants.FileReadChunkSize);
+                //stream.Read(checkBytes, 0, Constants.FileReadChunkSize);
+                stream.Read(checkSpan);
                 relativeOffset = 0;
 
-                while (!itemFound && relativeOffset < Constants.FileReadChunkSize)
+                while (relativeOffset < Constants.FileReadChunkSize)
                 {
-                    if (relativeOffset + searchBytes.Length < checkBytes.Length)
+                    //if (relativeOffset + searchBytes.Length < checkBytes.Length)
+                    if (relativeOffset + searchBytes.Length < checkSpan.Length)
                     {
-                        compareBytes = new byte[searchBytes.Length];
-                        Array.Copy(checkBytes, relativeOffset, compareBytes, 0, searchBytes.Length);
+                        //var compareSpan = new ReadOnlySpan<byte>(checkBytes, relativeOffset, searchBytes.Length);
+                        var compareSpan = checkSpan.Slice(relativeOffset, searchBytes.Length);
+                        var searchSpan = new ReadOnlySpan<byte>(searchBytes);
 
-                        if (CompareSegment(compareBytes, 0, searchBytes))
+                        if (compareSpan.SequenceEqual(searchSpan))
                         {
                             itemFound = true;
                             ret = absoluteOffset + relativeOffset;
@@ -659,25 +661,33 @@ namespace VGMToolbox.util
         /// <returns>True if the bytes at pOffset match the pTarget bytes.</returns>
         public static bool CompareSegment(byte[] sourceArray, int offset, byte[] target)
         {
-            var ret = true;
-            uint j = 0;
+            if (sourceArray.Length <= 0)
+                return false;
 
-            if (sourceArray.Length > 0)
-                for (var i = offset; i < target.Length; i++)
-                {
-                    if (sourceArray[i] != target[j])
-                    {
-                        ret = false;
-                        break;
-                    }
-
-                    j++;
-                }
-            else
-                ret = false;
-
-            return ret;
+            var sourceSpan = new ReadOnlySpan<byte>(sourceArray, offset, target.Length);
+            var targetSpan = new ReadOnlySpan<byte>(target, 0, target.Length);
+            return sourceSpan.SequenceEqual(targetSpan);
         }
+
+        /// <summary>
+        ///     Compare bytes at input offset to target bytes.
+        /// </summary>
+        /// <param name="sourceArray">Bytes to compare.</param>
+        /// <param name="offset">Offset to begin comparison of pBytes to pTarget.</param>
+        /// <param name="target">Target bytes to compare.</param>
+        /// <returns>True if the bytes at pOffset match the pTarget bytes.</returns>
+        public static bool CompareSegment(ReadOnlySpan<byte> sourceArray, int offset, ReadOnlySpan<byte> target)
+        {
+            if (sourceArray.Length <= 0)
+                return false;
+
+            //var sourceSpan = new ReadOnlySpan<byte>(sourceArray, offset, target.Length);
+            var sourceSpan = sourceArray.Slice(offset, target.Length);
+            //var targetSpan = new ReadOnlySpan<byte>(target, 0, target.Length);
+            return sourceSpan.SequenceEqual(target);
+        }
+
+        //var sourceSpan = new ReadOnlySpan<byte>(sourceArray, offset, target.Length - offset);
 
         /// <summary>
         ///     Compare bytes at input offset to target bytes.

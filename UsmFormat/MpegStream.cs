@@ -349,12 +349,13 @@ namespace VGMToolbox.format
             return 0;
         }
 
-        protected virtual void DoFinalTasks(FileStream sourceFileStream, Dictionary<uint, FileStream> outputFiles,
+        protected virtual string[] DoFinalTasks(FileStream sourceFileStream, Dictionary<uint, FileStream> outputFiles,
             bool addHeader)
         {
+            return null;
         }
 
-        public virtual void DemultiplexStreams(DemuxOptionsStruct demuxOptions)
+        public virtual string[] DemultiplexStreams(DemuxOptionsStruct demuxOptions)
         {
             using (var fs = File.OpenRead(FilePath))
             {
@@ -602,12 +603,13 @@ namespace VGMToolbox.format
                 ///////////////////////////////////
                 // Perform any final tasks needed
                 ///////////////////////////////////
-                DoFinalTasks(fs, streamOutputWriters, demuxOptions.AddHeader);
+                var files = DoFinalTasks(fs, streamOutputWriters, demuxOptions.AddHeader);
 
                 //////////////////////////
                 // close all open writers
                 //////////////////////////
                 closeAllWriters(streamOutputWriters);
+                return files;
             } // using (FileStream fs = File.OpenRead(path))
         }
 

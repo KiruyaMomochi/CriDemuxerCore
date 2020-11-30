@@ -148,7 +148,7 @@ namespace VGMToolbox.format
             return checkBytes;
         }
 
-        protected override void DoFinalTasks(FileStream sourceFileStream, Dictionary<uint, FileStream> outputFiles,
+        protected override string[] DoFinalTasks(FileStream sourceFileStream, Dictionary<uint, FileStream> outputFiles,
             bool addHeader)
         {
             long headerEndOffset;
@@ -162,6 +162,8 @@ namespace VGMToolbox.format
             string workingFile;
             string fileExtension;
             string destinationFileName;
+
+            var files = new List<string>(outputFiles.Count);
 
             foreach (var streamId in outputFiles.Keys)
             {
@@ -210,16 +212,16 @@ namespace VGMToolbox.format
                 outputFiles[streamId].Dispose();
 
                 workingFile = FileUtil.RemoveChunkFromFile(sourceFileName, 0, headerSize);
-                File.Copy(workingFile, sourceFileName, true);
-                File.Delete(workingFile);
+                File.Move(workingFile, sourceFileName, true);
 
                 workingFile = FileUtil.RemoveChunkFromFile(sourceFileName, footerOffset, footerSize);
                 destinationFileName = Path.ChangeExtension(sourceFileName, fileExtension);
-                File.Copy(workingFile, destinationFileName, true);
-                File.Delete(workingFile);
+                File.Move(workingFile, destinationFileName, true);
+                files.Add(destinationFileName);
 
                 if (sourceFileName != destinationFileName && File.Exists(sourceFileName)) File.Delete(sourceFileName);
             }
+            return files.ToArray();
         }
     }
 }
