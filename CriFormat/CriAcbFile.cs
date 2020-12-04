@@ -585,10 +585,6 @@ namespace VGMToolbox.format
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
             finally
             {
                 if (internalFs != null)

@@ -224,10 +224,6 @@ namespace VGMToolbox.format
                     throw new FormatException(String.Format("@UTF signature not found at offset <0x{0}>.", offset.ToString("X8")));
                 }
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
             finally
             {
                 if (!String.IsNullOrEmpty(this.UtfTableFile))
@@ -708,10 +704,6 @@ namespace VGMToolbox.format
                 {
                     ret = false;
                 }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
             }
             finally
             {
