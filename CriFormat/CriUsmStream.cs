@@ -221,6 +221,7 @@ namespace VGMToolbox.format
 
                 if (sourceFileName != destinationFileName && File.Exists(sourceFileName)) File.Delete(sourceFileName);
             }
+
             return files.ToArray();
         }
     }

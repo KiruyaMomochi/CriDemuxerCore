@@ -1480,9 +1480,7 @@ namespace VGMToolbox.util
 
                 for (var i = 0; i < illegalPathChars.Length; i++)
                     if (c == illegalPathChars[i])
-                    {
                         path.Replace(illegalPathChars[i], '_');
-                    }
             }
 
             return path.Trim();

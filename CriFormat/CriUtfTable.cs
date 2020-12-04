@@ -9,9 +9,9 @@ using VGMToolbox.util;
 namespace VGMToolbox.format
 {
     public class CriField
-    {        
+    {
         public byte Type { set; get; }
-        public string Name { set; get; }        
+        public string Name { set; get; }
         public object Value { set; get; }
         public ulong Offset { set; get; }
         public ulong Size { set; get; }
@@ -30,33 +30,33 @@ namespace VGMToolbox.format
         //}
 
         public string ToString(FileStream fs,
-                               int currentIdent,
-                               bool useIncomingKeys = false,
-                               Dictionary < string, byte> lcgEncryptionKeys = null)
+            int currentIdent,
+            bool useIncomingKeys = false,
+            Dictionary<string, byte> lcgEncryptionKeys = null)
         {
-            StringBuilder sb = new StringBuilder();
-            string frontPad = new string(' ', currentIdent);
+            var sb = new StringBuilder();
+            var frontPad = new string(' ', currentIdent);
 
             sb.AppendFormat("0x{0} {1} {2} = {3}",
-                                this.Offset.ToString("X8"),
-                                this.Type.ToString("X2"),
-                                this.Name,
-                                this.GetStringValue(currentIdent, fs, useIncomingKeys, lcgEncryptionKeys));
+                Offset.ToString("X8"),
+                Type.ToString("X2"),
+                Name,
+                GetStringValue(currentIdent, fs, useIncomingKeys, lcgEncryptionKeys));
 
             return frontPad + sb.ToString();
         }
 
         public string GetStringValue(int currentIdent,
-                                     FileStream utfStream = null,                                     
-                                     bool useIncomingKeys = false,
-                                     Dictionary<string, byte> lcgEncryptionKeys = null)
+            FileStream utfStream = null,
+            bool useIncomingKeys = false,
+            Dictionary<string, byte> lcgEncryptionKeys = null)
         {
             ulong numericValue;
             long signedNumericValue;
-            byte maskedType = (byte)(this.Type & CriUtfTable.COLUMN_TYPE_MASK);
-            string stringValue = String.Empty;
+            var maskedType = (byte) (Type & CriUtfTable.COLUMN_TYPE_MASK);
+            var stringValue = string.Empty;
 
-            string frontPad = new string(' ', currentIdent);
+            var frontPad = new string(' ', currentIdent);
             string formattedString;
 
             switch (maskedType)
@@ -64,17 +64,17 @@ namespace VGMToolbox.format
                 case CriUtfTable.COLUMN_TYPE_DATA:
                     if (utfStream == null)
                     {
-                        stringValue = this.Value.ToString();
+                        stringValue = Value.ToString();
                     }
-                    else if (CriUtfTable.IsUtfTable(utfStream, (long)this.Offset, useIncomingKeys, lcgEncryptionKeys))
+                    else if (CriUtfTable.IsUtfTable(utfStream, (long) Offset, useIncomingKeys, lcgEncryptionKeys))
                     {
-                        CriUtfTable newUtf = new CriUtfTable();
-                        newUtf.Initialize(utfStream, (long)this.Offset);
-                        stringValue = newUtf.GetTableAsString((currentIdent + 4), true);
+                        var newUtf = new CriUtfTable();
+                        newUtf.Initialize(utfStream, (long) Offset);
+                        stringValue = newUtf.GetTableAsString(currentIdent + 4, true);
                     }
                     else
                     {
-                        stringValue = FileUtil.GetStringFromFileChunk(utfStream, this.Offset, this.Size);
+                        stringValue = FileUtil.GetStringFromFileChunk(utfStream, Offset, Size);
 
                         if (stringValue.Length > 0x20)
                         {
@@ -82,26 +82,27 @@ namespace VGMToolbox.format
                             stringValue = Environment.NewLine + formattedString;
                         }
                     }
-                    
+
                     break;
                 case CriUtfTable.COLUMN_TYPE_STRING:
-                    stringValue = (string)this.Value;
+                    stringValue = (string) Value;
                     break;
                 case CriUtfTable.COLUMN_TYPE_FLOAT:
-                    stringValue = Convert.ToSingle(this.Value).ToString();
+                    stringValue = Convert.ToSingle(Value).ToString();
                     break;
-                case CriUtfTable.COLUMN_TYPE_8BYTE:                    
+                case CriUtfTable.COLUMN_TYPE_8BYTE:
                 case CriUtfTable.COLUMN_TYPE_4BYTE:
                 case CriUtfTable.COLUMN_TYPE_2BYTE:
                 case CriUtfTable.COLUMN_TYPE_1BYTE:
-                    numericValue = Convert.ToUInt64(this.Value);
-                    stringValue = String.Format("0x{0} ({1})", numericValue.ToString("X8"), numericValue.ToString());
+                    numericValue = Convert.ToUInt64(Value);
+                    stringValue = string.Format("0x{0} ({1})", numericValue.ToString("X8"), numericValue.ToString());
                     break;
                 case CriUtfTable.COLUMN_TYPE_4BYTE2:
                 case CriUtfTable.COLUMN_TYPE_2BYTE2:
                 case CriUtfTable.COLUMN_TYPE_1BYTE2:
-                    signedNumericValue = Convert.ToInt64(this.Value);
-                    stringValue = String.Format("0x{0} ({1})", signedNumericValue.ToString("X8"), signedNumericValue.ToString());
+                    signedNumericValue = Convert.ToInt64(Value);
+                    stringValue = string.Format("0x{0} ({1})", signedNumericValue.ToString("X8"),
+                        signedNumericValue.ToString());
                     break;
             }
 
@@ -124,7 +125,7 @@ namespace VGMToolbox.format
 
         #region Constants
 
-        public static readonly byte[] SIGNATURE_BYTES = new byte[] { 0x40, 0x55, 0x54, 0x46 };
+        public static readonly byte[] SIGNATURE_BYTES = new byte[] {0x40, 0x55, 0x54, 0x46};
         public const string LCG_SEED_KEY = "SEED";
         public const string LCG_INCREMENT_KEY = "INC";
         public const string TEMP_UTF_TABLE_FILE = "VGMT_UTF.BIN";
@@ -138,9 +139,12 @@ namespace VGMToolbox.format
         // I suspect that "type 2" is signed
         public const byte COLUMN_TYPE_MASK = 0x0F;
         public const byte COLUMN_TYPE_DATA = 0x0B;
+
         public const byte COLUMN_TYPE_STRING = 0x0A;
+
         // 0x09 double? 
         public const byte COLUMN_TYPE_FLOAT = 0x08;
+
         // 0x07 signed 8byte? 
         public const byte COLUMN_TYPE_8BYTE = 0x06;
         public const byte COLUMN_TYPE_4BYTE2 = 0x05;
@@ -173,7 +177,7 @@ namespace VGMToolbox.format
         public string TableName { set; get; }
 
         public ushort NumberOfFields { set; get; }
-        
+
         public ushort RowSize { set; get; }
         public uint NumberOfRows { set; get; }
 
@@ -185,79 +189,69 @@ namespace VGMToolbox.format
 
         public void Initialize(FileStream fs, long offset)
         {
-            this.SourceFile = fs.Name;
-            this.BaseOffset = offset;
+            SourceFile = fs.Name;
+            BaseOffset = offset;
 
             try
             {
-                this.MagicBytes = ParseFile.ParseSimpleOffset(fs, this.BaseOffset, 4);
+                MagicBytes = ParseFile.ParseSimpleOffset(fs, BaseOffset, 4);
 
                 // check if file is decrypted and get decryption keys if needed
-                this.checkEncryption(fs);
+                checkEncryption(fs);
 
                 // write (decrypted) utf header to file 
-                this.UtfTableFile = this.WriteTableToTempFile(fs, offset);
-                
-                this.IsEncrypted = false; // since we've decrypted to a temp file
-                this.UtfReader.IsEncrypted = false;
+                UtfTableFile = WriteTableToTempFile(fs, offset);
 
-                if (ParseFile.CompareSegment(this.MagicBytes, 0, SIGNATURE_BYTES))
-                {
-                    using (FileStream utfTableStream = File.Open(this.UtfTableFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+                IsEncrypted = false; // since we've decrypted to a temp file
+                UtfReader.IsEncrypted = false;
+
+                if (ParseFile.CompareSegment(MagicBytes, 0, SIGNATURE_BYTES))
+                    using (var utfTableStream = File.Open(UtfTableFile, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         // read header
-                        this.initializeUtfHeader(utfTableStream);
+                        initializeUtfHeader(utfTableStream);
 
                         // initialize rows
-                        this.Rows = new Dictionary<string, CriField>[this.NumberOfRows];
+                        Rows = new Dictionary<string, CriField>[NumberOfRows];
 
                         // read schema
-                        if (this.TableSize > 0)
-                        {
-                            this.initializeUtfSchema(fs, utfTableStream, 0x20);
-                        }
+                        if (TableSize > 0) initializeUtfSchema(fs, utfTableStream, 0x20);
                     }
-                }
                 else
-                {
                     //Dictionary<string, byte> foo = GetKeysForEncryptedUtfTable(this.MagicBytes);
-                    throw new FormatException(String.Format("@UTF signature not found at offset <0x{0}>.", offset.ToString("X8")));
-                }
+                    throw new FormatException(string.Format("@UTF signature not found at offset <0x{0}>.",
+                        offset.ToString("X8")));
             }
             finally
             {
-                if (!String.IsNullOrEmpty(this.UtfTableFile))
-                {
-                    File.Delete(this.UtfTableFile);
-                }
+                if (!string.IsNullOrEmpty(UtfTableFile)) File.Delete(UtfTableFile);
             }
-        
         }
 
         public string GetTableAsString(int currentIdent, bool useExistingKeys = false)
         {
             CriField field;
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
-            string frontPad = new string(' ', currentIdent);
+            var frontPad = new string(' ', currentIdent);
 
             sb.AppendLine();
             sb.AppendLine(frontPad + "---------------------------");
             sb.AppendLine(frontPad + "-------- UTF START --------".PadLeft(currentIdent));
             sb.AppendLine(frontPad + "---------------------------".PadLeft(currentIdent));
 
-            using (FileStream fs = File.Open(this.SourceFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var fs = File.Open(SourceFile, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                for (int i = 0; i < this.Rows.Length; i++)
+                for (var i = 0; i < Rows.Length; i++)
                 {
-                    sb.AppendFormat("{0}{1}[0x{2}]{3}", frontPad, this.TableName, i.ToString("X4"), Environment.NewLine);
+                    sb.AppendFormat("{0}{1}[0x{2}]{3}", frontPad, TableName, i.ToString("X4"), Environment.NewLine);
 
-                    var d = this.Rows[i];
+                    var d = Rows[i];
 
                     foreach (var key in d.Keys)
                     {
                         field = d[key];
-                        sb.AppendLine(field.ToString(fs, (currentIdent + 2), useExistingKeys, this.LcgEncryptionKeys));
+                        sb.AppendLine(field.ToString(fs, currentIdent + 2, useExistingKeys, LcgEncryptionKeys));
                     }
 
                     sb.AppendLine();
@@ -271,63 +265,57 @@ namespace VGMToolbox.format
             return sb.ToString();
         }
 
-        private void checkEncryption(FileStream fs, bool useIncomingKeys = false, Dictionary<string, byte> incomingLcgEncryptionKeys = null)
+        private void checkEncryption(FileStream fs, bool useIncomingKeys = false,
+            Dictionary<string, byte> incomingLcgEncryptionKeys = null)
         {
-            if (ParseFile.CompareSegment(this.MagicBytes, 0, SIGNATURE_BYTES) ||
-                ((useIncomingKeys) && (incomingLcgEncryptionKeys == null))
-                )
+            if (ParseFile.CompareSegment(MagicBytes, 0, SIGNATURE_BYTES) ||
+                useIncomingKeys && incomingLcgEncryptionKeys == null
+            )
             {
-                this.IsEncrypted = false;
-                this.UtfReader = new CriUtfReader();
+                IsEncrypted = false;
+                UtfReader = new CriUtfReader();
             }
             else
             {
-                this.IsEncrypted = true;
+                IsEncrypted = true;
 
                 if (useIncomingKeys) // use incoming keys if available
                 {
-                    if (incomingLcgEncryptionKeys != null) 
-                    {
-                        this.LcgEncryptionKeys = incomingLcgEncryptionKeys;
-                    }
+                    if (incomingLcgEncryptionKeys != null) LcgEncryptionKeys = incomingLcgEncryptionKeys;
                 }
-                else if (this.LcgEncryptionKeys == null) // use keys found earlier, assume same keys for entire file
+                else if (LcgEncryptionKeys == null) // use keys found earlier, assume same keys for entire file
                 {
-                    this.LcgEncryptionKeys = GetKeysForEncryptedUtfTable(this.MagicBytes);
+                    LcgEncryptionKeys = GetKeysForEncryptedUtfTable(MagicBytes);
                 }
 
-                if (this.LcgEncryptionKeys.Count != 2)
-                {
-                    throw new FormatException(String.Format("Unable to decrypt UTF table at offset: 0x{0}", this.BaseOffset.ToString("X8")));
-                }
+                if (LcgEncryptionKeys.Count != 2)
+                    throw new FormatException(string.Format("Unable to decrypt UTF table at offset: 0x{0}",
+                        BaseOffset.ToString("X8")));
                 else
-                {
-                    this.UtfReader = new CriUtfReader(this.LcgEncryptionKeys[LCG_SEED_KEY], 
-                                                      this.LcgEncryptionKeys[LCG_INCREMENT_KEY], this.IsEncrypted);
-                }
+                    UtfReader = new CriUtfReader(LcgEncryptionKeys[LCG_SEED_KEY],
+                        LcgEncryptionKeys[LCG_INCREMENT_KEY], IsEncrypted);
 
-                this.MagicBytes = this.UtfReader.GetBytes(fs, this.BaseOffset, 4, 0);
+                MagicBytes = UtfReader.GetBytes(fs, BaseOffset, 4, 0);
             }
-
         }
 
         private void initializeUtfHeader(FileStream UtfTableFs)
         {
-            this.TableSize = ParseFile.ReadUintBE(UtfTableFs, 4);
+            TableSize = ParseFile.ReadUintBE(UtfTableFs, 4);
 
-            this.Unknown1 = ParseFile.ReadUshortBE(UtfTableFs, 8);
+            Unknown1 = ParseFile.ReadUshortBE(UtfTableFs, 8);
 
-            this.RowOffset = (uint)ParseFile.ReadUshortBE(UtfTableFs, 0xA) + 8;
-            this.StringTableOffset = ParseFile.ReadUintBE(UtfTableFs, 0xC) + 8;
-            this.DataOffset = ParseFile.ReadUintBE(UtfTableFs, 0x10) + 8;
+            RowOffset = (uint) ParseFile.ReadUshortBE(UtfTableFs, 0xA) + 8;
+            StringTableOffset = ParseFile.ReadUintBE(UtfTableFs, 0xC) + 8;
+            DataOffset = ParseFile.ReadUintBE(UtfTableFs, 0x10) + 8;
 
-            this.TableNameOffset = ParseFile.ReadUintBE(UtfTableFs, 0x14);
-            this.TableName = ParseFile.ReadAsciiString(UtfTableFs, this.StringTableOffset + this.TableNameOffset);
+            TableNameOffset = ParseFile.ReadUintBE(UtfTableFs, 0x14);
+            TableName = ParseFile.ReadAsciiString(UtfTableFs, StringTableOffset + TableNameOffset);
 
-            this.NumberOfFields = ParseFile.ReadUshortBE(UtfTableFs, 0x18);
+            NumberOfFields = ParseFile.ReadUshortBE(UtfTableFs, 0x18);
 
-            this.RowSize = ParseFile.ReadUshortBE(UtfTableFs, 0x1A);
-            this.NumberOfRows = ParseFile.ReadUintBE(UtfTableFs, 0x1C);        
+            RowSize = ParseFile.ReadUshortBE(UtfTableFs, 0x1A);
+            NumberOfRows = ParseFile.ReadUintBE(UtfTableFs, 0x1C);
         }
 
         private void initializeUtfSchema(FileStream SourceFs, FileStream UtfTableFs, long schemaOffset)
@@ -335,20 +323,20 @@ namespace VGMToolbox.format
             long nameOffset;
 
             long constantOffset;
-            
+
             long dataOffset;
             long dataSize;
 
             long rowDataOffset;
             long rowDataSize;
 
-            long currentOffset = schemaOffset;
+            var currentOffset = schemaOffset;
             long currentRowBase;
             long currentRowOffset = 0;
-            
+
             CriField field;
 
-            for (uint i = 0; i < this.NumberOfRows; i++)
+            for (uint i = 0; i < NumberOfRows; i++)
             {
                 //if (i == 0x1a2a)
                 //{
@@ -356,148 +344,149 @@ namespace VGMToolbox.format
                 //}                
                 //try
                 //{
-                    currentOffset = schemaOffset;
-                    currentRowBase = this.RowOffset + (this.RowSize * i);
-                    currentRowOffset = 0;
-                    this.Rows[i] = new Dictionary<string, CriField>();
+                currentOffset = schemaOffset;
+                currentRowBase = RowOffset + RowSize * i;
+                currentRowOffset = 0;
+                Rows[i] = new Dictionary<string, CriField>();
 
-                    // parse fields
-                    for (ushort j = 0; j < this.NumberOfFields; j++)
+                // parse fields
+                for (ushort j = 0; j < NumberOfFields; j++)
+                {
+                    field = new CriField();
+
+                    field.Type = ParseFile.ReadByte(UtfTableFs, currentOffset);
+                    nameOffset = ParseFile.ReadUintBE(UtfTableFs, currentOffset + 1);
+                    field.Name = ParseFile.ReadAsciiString(UtfTableFs, StringTableOffset + nameOffset);
+
+                    // each row will have a constant
+                    if ((field.Type & COLUMN_STORAGE_MASK) == COLUMN_STORAGE_CONSTANT ||
+                        (field.Type & COLUMN_STORAGE_MASK) == COLUMN_STORAGE_CONSTANT2)
                     {
-                        field = new CriField();
+                        // capture offset of constant
+                        constantOffset = currentOffset + 5;
 
-                        field.Type = ParseFile.ReadByte(UtfTableFs, currentOffset);
-                        nameOffset = ParseFile.ReadUintBE(UtfTableFs, currentOffset + 1);
-                        field.Name = ParseFile.ReadAsciiString(UtfTableFs, this.StringTableOffset + nameOffset);
-
-                        // each row will have a constant
-                        if (((field.Type & COLUMN_STORAGE_MASK) == COLUMN_STORAGE_CONSTANT) ||
-                            ((field.Type & COLUMN_STORAGE_MASK) == COLUMN_STORAGE_CONSTANT2))
+                        // read the constant depending on the type
+                        switch (field.Type & COLUMN_TYPE_MASK)
                         {
-                            // capture offset of constant
-                            constantOffset = currentOffset + 5;
+                            case COLUMN_TYPE_STRING:
+                                dataOffset = ParseFile.ReadUintBE(UtfTableFs, constantOffset);
+                                field.Value = ParseFile.ReadAsciiString(UtfTableFs, StringTableOffset + dataOffset);
+                                currentOffset += 4;
+                                break;
+                            case COLUMN_TYPE_8BYTE:
+                                field.Value = ParseFile.ReadUlongBE(UtfTableFs, constantOffset);
+                                currentOffset += 8;
+                                break;
+                            case COLUMN_TYPE_DATA:
+                                dataOffset = ParseFile.ReadUintBE(UtfTableFs, constantOffset);
+                                dataSize = ParseFile.ReadUintBE(UtfTableFs, constantOffset + 4);
+                                field.Offset = (ulong) (BaseOffset + DataOffset + dataOffset);
+                                field.Size = (ulong) dataSize;
 
-                            // read the constant depending on the type
-                            switch (field.Type & COLUMN_TYPE_MASK)
-                            {
-                                case COLUMN_TYPE_STRING:
-                                    dataOffset = ParseFile.ReadUintBE(UtfTableFs, constantOffset);
-                                    field.Value = ParseFile.ReadAsciiString(UtfTableFs, this.StringTableOffset + dataOffset);
-                                    currentOffset += 4;
-                                    break;
-                                case COLUMN_TYPE_8BYTE:
-                                    field.Value = ParseFile.ReadUlongBE(UtfTableFs, constantOffset);
-                                    currentOffset += 8;
-                                    break;
-                                case COLUMN_TYPE_DATA:
-                                    dataOffset = ParseFile.ReadUintBE(UtfTableFs, constantOffset);
-                                    dataSize = ParseFile.ReadUintBE(UtfTableFs, constantOffset + 4);
-                                    field.Offset = (ulong)(this.BaseOffset + this.DataOffset + dataOffset);
-                                    field.Size = (ulong)dataSize;
-                                    
-                                    // don't think this is encrypted, need to check
-                                    field.Value = ParseFile.ParseSimpleOffset(SourceFs, (long)field.Offset, (int)dataSize);
-                                    currentOffset += 8;
-                                    break;
-                                case COLUMN_TYPE_FLOAT:
-                                    field.Value = ParseFile.ReadFloatBE(UtfTableFs, constantOffset);
-                                    currentOffset += 4;
-                                    break;
-                                case COLUMN_TYPE_4BYTE2:
-                                    field.Value = ParseFile.ReadInt32BE(UtfTableFs, constantOffset);
-                                    currentOffset += 4;
-                                    break;
-                                case COLUMN_TYPE_4BYTE:
-                                    field.Value = ParseFile.ReadUintBE(UtfTableFs, constantOffset);
-                                    currentOffset += 4;
-                                    break;
-                                case COLUMN_TYPE_2BYTE2:
-                                    field.Value = ParseFile.ReadInt16BE(UtfTableFs, constantOffset);
-                                    currentOffset += 2;
-                                    break;
-                                case COLUMN_TYPE_2BYTE:
-                                    field.Value = ParseFile.ReadUshortBE(UtfTableFs, constantOffset);
-                                    currentOffset += 2;
-                                    break;
-                                case COLUMN_TYPE_1BYTE2:
-                                    field.Value = ParseFile.ReadSByte(UtfTableFs, constantOffset);
-                                    currentOffset += 1;
-                                    break;
-                                case COLUMN_TYPE_1BYTE:
-                                    field.Value = ParseFile.ReadByte(UtfTableFs, constantOffset);
-                                    currentOffset += 1;
-                                    break;
-                                default:
-                                    throw new FormatException(String.Format("Unknown COLUMN TYPE at offset: 0x{0}", currentOffset.ToString("X8")));
-
-                            } // switch (field.Type & COLUMN_TYPE_MASK)
-                        }
-                        else if ((field.Type & COLUMN_STORAGE_MASK) == COLUMN_STORAGE_PERROW)
+                                // don't think this is encrypted, need to check
+                                field.Value =
+                                    ParseFile.ParseSimpleOffset(SourceFs, (long) field.Offset, (int) dataSize);
+                                currentOffset += 8;
+                                break;
+                            case COLUMN_TYPE_FLOAT:
+                                field.Value = ParseFile.ReadFloatBE(UtfTableFs, constantOffset);
+                                currentOffset += 4;
+                                break;
+                            case COLUMN_TYPE_4BYTE2:
+                                field.Value = ParseFile.ReadInt32BE(UtfTableFs, constantOffset);
+                                currentOffset += 4;
+                                break;
+                            case COLUMN_TYPE_4BYTE:
+                                field.Value = ParseFile.ReadUintBE(UtfTableFs, constantOffset);
+                                currentOffset += 4;
+                                break;
+                            case COLUMN_TYPE_2BYTE2:
+                                field.Value = ParseFile.ReadInt16BE(UtfTableFs, constantOffset);
+                                currentOffset += 2;
+                                break;
+                            case COLUMN_TYPE_2BYTE:
+                                field.Value = ParseFile.ReadUshortBE(UtfTableFs, constantOffset);
+                                currentOffset += 2;
+                                break;
+                            case COLUMN_TYPE_1BYTE2:
+                                field.Value = ParseFile.ReadSByte(UtfTableFs, constantOffset);
+                                currentOffset += 1;
+                                break;
+                            case COLUMN_TYPE_1BYTE:
+                                field.Value = ParseFile.ReadByte(UtfTableFs, constantOffset);
+                                currentOffset += 1;
+                                break;
+                            default:
+                                throw new FormatException(string.Format("Unknown COLUMN TYPE at offset: 0x{0}",
+                                    currentOffset.ToString("X8")));
+                        } // switch (field.Type & COLUMN_TYPE_MASK)
+                    }
+                    else if ((field.Type & COLUMN_STORAGE_MASK) == COLUMN_STORAGE_PERROW)
+                    {
+                        // read the constant depending on the type
+                        switch (field.Type & COLUMN_TYPE_MASK)
                         {
-                            // read the constant depending on the type
-                            switch (field.Type & COLUMN_TYPE_MASK)
-                            {
-                                case COLUMN_TYPE_STRING:
-                                    rowDataOffset = ParseFile.ReadUintBE(UtfTableFs, currentRowBase + currentRowOffset);
-                                    field.Value = ParseFile.ReadAsciiString(UtfTableFs, this.StringTableOffset + rowDataOffset);
-                                    currentRowOffset += 4;
-                                    break;
-                                case COLUMN_TYPE_8BYTE:
-                                    field.Value = ParseFile.ReadUlongBE(UtfTableFs, currentRowBase + currentRowOffset);
-                                    currentRowOffset += 8;
-                                    break;
-                                case COLUMN_TYPE_DATA:
-                                    rowDataOffset = ParseFile.ReadUintBE(UtfTableFs, currentRowBase + currentRowOffset);
-                                    rowDataSize = ParseFile.ReadUintBE(UtfTableFs, currentRowBase + currentRowOffset + 4);
-                                    field.Offset = (ulong)(this.BaseOffset + this.DataOffset + rowDataOffset);
-                                    field.Size = (ulong)rowDataSize;
-                                    
-                                    // don't think this is encrypted
-                                    field.Value = ParseFile.ParseSimpleOffset(SourceFs, (long)field.Offset, (int)rowDataSize);
-                                    currentRowOffset += 8;
-                                    break;
-                                case COLUMN_TYPE_FLOAT:
-                                    field.Value = ParseFile.ReadFloatBE(UtfTableFs, currentRowBase + currentRowOffset);
-                                    currentRowOffset += 4;
-                                    break;
-                                case COLUMN_TYPE_4BYTE2:
-                                    field.Value = ParseFile.ReadInt32BE(UtfTableFs, currentRowBase + currentRowOffset);
-                                    currentRowOffset += 4;
-                                    break;
-                                case COLUMN_TYPE_4BYTE:
-                                    field.Value = ParseFile.ReadUintBE(UtfTableFs, currentRowBase + currentRowOffset);
-                                    currentRowOffset += 4;
-                                    break;
-                                case COLUMN_TYPE_2BYTE2:
-                                    field.Value = ParseFile.ReadInt16BE(UtfTableFs, currentRowBase + currentRowOffset);
-                                    currentRowOffset += 2;
-                                    break;
-                                case COLUMN_TYPE_2BYTE:
-                                    field.Value = ParseFile.ReadUshortBE(UtfTableFs, currentRowBase + currentRowOffset);
-                                    currentRowOffset += 2;
-                                    break;
-                                case COLUMN_TYPE_1BYTE2:
-                                    field.Value = ParseFile.ReadSByte(UtfTableFs, currentRowBase + currentRowOffset);
-                                    currentRowOffset += 1;
-                                    break;
-                                case COLUMN_TYPE_1BYTE:
-                                    field.Value = ParseFile.ReadByte(UtfTableFs, currentRowBase + currentRowOffset);
-                                    currentRowOffset += 1;
-                                    break;
-                                default:
-                                    throw new FormatException(String.Format("Unknown COLUMN TYPE at offset: 0x{0}", currentOffset.ToString("X8")));
+                            case COLUMN_TYPE_STRING:
+                                rowDataOffset = ParseFile.ReadUintBE(UtfTableFs, currentRowBase + currentRowOffset);
+                                field.Value = ParseFile.ReadAsciiString(UtfTableFs, StringTableOffset + rowDataOffset);
+                                currentRowOffset += 4;
+                                break;
+                            case COLUMN_TYPE_8BYTE:
+                                field.Value = ParseFile.ReadUlongBE(UtfTableFs, currentRowBase + currentRowOffset);
+                                currentRowOffset += 8;
+                                break;
+                            case COLUMN_TYPE_DATA:
+                                rowDataOffset = ParseFile.ReadUintBE(UtfTableFs, currentRowBase + currentRowOffset);
+                                rowDataSize = ParseFile.ReadUintBE(UtfTableFs, currentRowBase + currentRowOffset + 4);
+                                field.Offset = (ulong) (BaseOffset + DataOffset + rowDataOffset);
+                                field.Size = (ulong) rowDataSize;
 
-                            } // switch (field.Type & COLUMN_TYPE_MASK)
+                                // don't think this is encrypted
+                                field.Value =
+                                    ParseFile.ParseSimpleOffset(SourceFs, (long) field.Offset, (int) rowDataSize);
+                                currentRowOffset += 8;
+                                break;
+                            case COLUMN_TYPE_FLOAT:
+                                field.Value = ParseFile.ReadFloatBE(UtfTableFs, currentRowBase + currentRowOffset);
+                                currentRowOffset += 4;
+                                break;
+                            case COLUMN_TYPE_4BYTE2:
+                                field.Value = ParseFile.ReadInt32BE(UtfTableFs, currentRowBase + currentRowOffset);
+                                currentRowOffset += 4;
+                                break;
+                            case COLUMN_TYPE_4BYTE:
+                                field.Value = ParseFile.ReadUintBE(UtfTableFs, currentRowBase + currentRowOffset);
+                                currentRowOffset += 4;
+                                break;
+                            case COLUMN_TYPE_2BYTE2:
+                                field.Value = ParseFile.ReadInt16BE(UtfTableFs, currentRowBase + currentRowOffset);
+                                currentRowOffset += 2;
+                                break;
+                            case COLUMN_TYPE_2BYTE:
+                                field.Value = ParseFile.ReadUshortBE(UtfTableFs, currentRowBase + currentRowOffset);
+                                currentRowOffset += 2;
+                                break;
+                            case COLUMN_TYPE_1BYTE2:
+                                field.Value = ParseFile.ReadSByte(UtfTableFs, currentRowBase + currentRowOffset);
+                                currentRowOffset += 1;
+                                break;
+                            case COLUMN_TYPE_1BYTE:
+                                field.Value = ParseFile.ReadByte(UtfTableFs, currentRowBase + currentRowOffset);
+                                currentRowOffset += 1;
+                                break;
+                            default:
+                                throw new FormatException(string.Format("Unknown COLUMN TYPE at offset: 0x{0}",
+                                    currentOffset.ToString("X8")));
+                        } // switch (field.Type & COLUMN_TYPE_MASK)
+                    } // if ((fields[i].Type & COLUMN_STORAGE_MASK) == COLUMN_STORAGE_CONSTANT)
 
-                        } // if ((fields[i].Type & COLUMN_STORAGE_MASK) == COLUMN_STORAGE_CONSTANT)
+                    // add field to dictionary
+                    Rows[i].Add(field.Name, field);
 
-                        // add field to dictionary
-                        this.Rows[i].Add(field.Name, field);
+                    // move to next field
+                    currentOffset += 5; //  sizeof(CriField.Type + CriField.NameOffset)
+                } // for (ushort j = 0; j < this.NumberOfFields; j++)
 
-                        // move to next field
-                        currentOffset += 5; //  sizeof(CriField.Type + CriField.NameOffset)
-
-                    } // for (ushort j = 0; j < this.NumberOfFields; j++)
                 //}
                 //catch (Exception ex)
                 //{
@@ -510,39 +499,31 @@ namespace VGMToolbox.format
         {
             string pathToUtf = null;
 
-            int totalBytesRead = 0;
+            var totalBytesRead = 0;
             int maxRead;
-            byte[] buffer = new byte[Constants.FileReadChunkSize];
-            
+            var buffer = new byte[Constants.FileReadChunkSize];
+
             int tableSize;
 
             if (maxTableSize != null) // typically used for isUtf function
-            {
-                tableSize = (int)maxTableSize;
-            }
+                tableSize = (int) maxTableSize;
             else
-            {
-                tableSize = (int)this.UtfReader.ReadUint(fs, offsetToUtfTable, 4) + 8;
-            }
+                tableSize = (int) UtfReader.ReadUint(fs, offsetToUtfTable, 4) + 8;
 
             pathToUtf = Path.Combine(Path.GetTempPath(), TEMP_UTF_TABLE_FILE);
-            
-            if (this.IsEncrypted)
+
+            if (IsEncrypted)
             {
-                using (FileStream tempStream = File.Open(pathToUtf, FileMode.Create, FileAccess.Write, FileShare.Read))
+                using (var tempStream = File.Open(pathToUtf, FileMode.Create, FileAccess.Write, FileShare.Read))
                 {
                     while (totalBytesRead < tableSize)
                     {
-                        if ((tableSize - totalBytesRead) > buffer.Length)
-                        {
+                        if (tableSize - totalBytesRead > buffer.Length)
                             maxRead = buffer.Length;
-                        }
                         else
-                        {
-                            maxRead = (tableSize - totalBytesRead);
-                        }
+                            maxRead = tableSize - totalBytesRead;
 
-                        buffer = this.UtfReader.GetBytes(fs, offsetToUtfTable, maxRead, totalBytesRead);
+                        buffer = UtfReader.GetBytes(fs, offsetToUtfTable, maxRead, totalBytesRead);
                         tempStream.Write(buffer, 0, maxRead);
                         totalBytesRead += maxRead;
                     }
@@ -550,12 +531,10 @@ namespace VGMToolbox.format
             }
             else
             {
-                if (File.Exists(pathToUtf))
-                {
-                    File.Delete(pathToUtf);
-                }
+                if (File.Exists(pathToUtf)) File.Delete(pathToUtf);
 
-                ParseFile.ExtractChunkToFile64(fs, (ulong)offsetToUtfTable, (ulong)tableSize, pathToUtf, false, false);
+                ParseFile.ExtractChunkToFile64(fs, (ulong) offsetToUtfTable, (ulong) tableSize, pathToUtf, false,
+                    false);
             }
 
             return pathToUtf;
@@ -566,12 +545,8 @@ namespace VGMToolbox.format
             object ret = null;
 
             if (utfTable.Rows.GetLength(0) > rowIndex)
-            {
                 if (utfTable.Rows[rowIndex].ContainsKey(key))
-                {
                     ret = utfTable.Rows[rowIndex][key].Value;
-                }
-            }
 
             return ret;
         }
@@ -581,12 +556,8 @@ namespace VGMToolbox.format
             ulong ret = 0;
 
             if (utfTable.Rows.GetLength(0) > rowIndex)
-            {
                 if (utfTable.Rows[rowIndex].ContainsKey(key))
-                {
                     ret = utfTable.Rows[rowIndex][key].Offset;
-                }
-            }
 
             return ret;
         }
@@ -596,42 +567,35 @@ namespace VGMToolbox.format
             ulong ret = 0;
 
             if (utfTable.Rows.GetLength(0) > rowIndex)
-            {
                 if (utfTable.Rows[rowIndex].ContainsKey(key))
-                {
                     ret = utfTable.Rows[rowIndex][key].Size;
-                }
-            }
 
             return ret;
         }
-       
+
         public static Dictionary<string, byte> GetKeysForEncryptedUtfTable(byte[] encryptedUtfSignature)
         {
-            Dictionary<string, byte> keys = new Dictionary<string, byte>();
+            var keys = new Dictionary<string, byte>();
             byte m, t;
 
-            byte[] xorBytes = new byte[SIGNATURE_BYTES.Length];
-            bool keysFound = false;
+            var xorBytes = new byte[SIGNATURE_BYTES.Length];
+            var keysFound = false;
 
             for (byte seed = 0; seed <= byte.MaxValue; seed++)
-            {
                 if (!keysFound)
                 {
                     // match first char
                     if ((encryptedUtfSignature[0] ^ seed) == SIGNATURE_BYTES[0])
-                    {
                         for (byte increment = 0; increment <= byte.MaxValue; increment++)
-                        {
                             if (!keysFound)
                             {
-                                m = (byte)(seed * increment);
+                                m = (byte) (seed * increment);
 
                                 if ((encryptedUtfSignature[1] ^ m) == SIGNATURE_BYTES[1])
                                 {
                                     t = increment;
 
-                                    for (int j = 2; j < SIGNATURE_BYTES.Length; j++)
+                                    for (var j = 2; j < SIGNATURE_BYTES.Length; j++)
                                     {
                                         m *= t;
 
@@ -639,7 +603,7 @@ namespace VGMToolbox.format
                                         {
                                             break;
                                         }
-                                        else if (j == (SIGNATURE_BYTES.Length - 1))
+                                        else if (j == SIGNATURE_BYTES.Length - 1)
                                         {
                                             keys.Add(LCG_SEED_KEY, seed);
                                             keys.Add(LCG_INCREMENT_KEY, increment);
@@ -652,24 +616,21 @@ namespace VGMToolbox.format
                             {
                                 break;
                             } // if (!keysFound)
-                        } // for (byte inc = 0; inc <= byte.MaxValue; inc++)
-                    } // if ((encryptedUtfSignature[0] ^ mult) == SIGNATURE_BYTES[0])
                 } // if (!keysFound)
                 else
                 {
                     break;
                 }
-            } // for (byte mult = 0; mult <= byte.MaxValue; mult++)
 
             return keys;
         }
 
         public static bool IsUtfTable(FileStream fs, long offset,
-                                      bool useIncomingKeys = false,
-                                      Dictionary<string, byte> incomingLcgEncryptionKeys = null)
+            bool useIncomingKeys = false,
+            Dictionary<string, byte> incomingLcgEncryptionKeys = null)
         {
-            bool ret = false;
-            CriUtfTable utf = new CriUtfTable();
+            var ret = false;
+            var utf = new CriUtfTable();
 
             utf.SourceFile = fs.Name;
             utf.BaseOffset = offset;
@@ -686,7 +647,7 @@ namespace VGMToolbox.format
                     // write (decrypted) utf header to file 
                     utf.UtfTableFile = utf.WriteTableToTempFile(fs, offset, 4);
 
-                    using (FileStream checkFs = File.Open(utf.UtfTableFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var checkFs = File.Open(utf.UtfTableFile, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         utf.MagicBytes = ParseFile.ParseSimpleOffset(checkFs, utf.BaseOffset, 4);
                     }
@@ -695,22 +656,15 @@ namespace VGMToolbox.format
                     //utf.IsEncrypted = false; // since we've decrypted to a temp file
                     // utf.UtfReader.IsEncrypted = false;
                 }
-                
+
                 if (ParseFile.CompareSegment(utf.MagicBytes, 0, SIGNATURE_BYTES))
-                {
                     ret = true;
-                }
                 else
-                {
                     ret = false;
-                }
             }
             finally
             {
-                if (!String.IsNullOrEmpty(utf.UtfTableFile))
-                {
-                    File.Delete(utf.UtfTableFile);
-                }
+                if (!string.IsNullOrEmpty(utf.UtfTableFile)) File.Delete(utf.UtfTableFile);
             }
 
             return ret;
@@ -722,7 +676,7 @@ namespace VGMToolbox.format
         public byte Seed { set; get; }
         public byte Increment { set; get; }
         public bool IsEncrypted { set; get; }
-        
+
         public byte CurrentXor { set; get; }
         public long CurrentUtfOffset { set; get; }
 
@@ -731,14 +685,14 @@ namespace VGMToolbox.format
 
         public CriUtfReader()
         {
-            this.IsEncrypted = false;
+            IsEncrypted = false;
         }
 
         public CriUtfReader(byte seed, byte increment, bool isEncrypted)
         {
-            this.Seed = seed;
-            this.Increment = increment;
-            this.IsEncrypted = isEncrypted;
+            Seed = seed;
+            Increment = increment;
+            IsEncrypted = isEncrypted;
         }
 
         public byte[] GetBytes(FileStream fs, long BaseOffset, int Size, long UtfOffset)
@@ -747,45 +701,35 @@ namespace VGMToolbox.format
 
             ret = ParseFile.ParseSimpleOffset(fs, BaseOffset + UtfOffset, Size);
 
-            if (this.IsEncrypted)
-            {               
-                if (UtfOffset < this.CurrentUtfOffset)
-                {
+            if (IsEncrypted)
+            {
+                if (UtfOffset < CurrentUtfOffset)
                     // reset, maybe add some sort of index later?
-                    this.CurrentUtfOffset = 0;
-                }
+                    CurrentUtfOffset = 0;
 
-                if (this.CurrentUtfOffset == 0)
-                {
+                if (CurrentUtfOffset == 0)
                     // reset or initialize
-                    this.CurrentXor = this.Seed;
-                }
+                    CurrentXor = Seed;
 
                 // catch up to this offset
-                for (long j = this.CurrentUtfOffset; j < UtfOffset; j++)
+                for (var j = CurrentUtfOffset; j < UtfOffset; j++)
                 {
-                    if (j > 0)
-                    {
-                        this.CurrentXor *= this.Increment;
-                    }
+                    if (j > 0) CurrentXor *= Increment;
 
-                    this.CurrentUtfOffset++;
+                    CurrentUtfOffset++;
                 }
 
                 // decrypt this offset
                 for (long i = 0; i < Size; i++)
                 {
                     // first byte of UTF table must be XOR'd with the seed
-                    if ((this.CurrentUtfOffset != 0) || (i > 0))
-                    {
-                        this.CurrentXor *= this.Increment;                        
-                    }
+                    if (CurrentUtfOffset != 0 || i > 0) CurrentXor *= Increment;
 
-                    ret[i] ^= this.CurrentXor;
-                    this.CurrentUtfOffset++;
+                    ret[i] ^= CurrentXor;
+                    CurrentUtfOffset++;
                 }
             }
-            
+
             return ret;
         }
 
@@ -794,135 +738,106 @@ namespace VGMToolbox.format
             byte encryptedByte;
             byte decryptedByte;
 
-            StringBuilder asciiVal =  new StringBuilder();
+            var asciiVal = new StringBuilder();
             // byte xorByte;
-            long fileSize = fs.Length;
+            var fileSize = fs.Length;
 
-            if (this.IsEncrypted)
+            if (IsEncrypted)
             {
-                fs.Position = (BaseOffset + UtfOffset);
+                fs.Position = BaseOffset + UtfOffset;
 
-                if (UtfOffset < this.CurrentUtfStringOffset)
-                {
+                if (UtfOffset < CurrentUtfStringOffset)
                     // reset, maybe add some sort of index later?
-                    this.CurrentUtfStringOffset = 0;
-                }
+                    CurrentUtfStringOffset = 0;
 
-                if (this.CurrentUtfStringOffset == 0)
-                {
+                if (CurrentUtfStringOffset == 0)
                     // reset or initialize
-                    this.CurrentStringXor = this.Seed;
+                    CurrentStringXor = Seed;
+
+                for (var j = CurrentUtfStringOffset; j < UtfOffset; j++)
+                {
+                    if (j > 0) CurrentStringXor *= Increment;
+
+                    CurrentUtfStringOffset++;
                 }
 
-                for (long j = this.CurrentUtfStringOffset; j < UtfOffset; j++)
+                for (var i = UtfOffset; i < fileSize - (BaseOffset + UtfOffset); i++)
                 {
-                    if (j > 0)
-                    {
-                        this.CurrentStringXor *= this.Increment;
-                    }
+                    CurrentStringXor *= Increment;
+                    CurrentUtfStringOffset++;
 
-                    this.CurrentUtfStringOffset++;
-                }
-
-                for (long i = UtfOffset; i < (fileSize - (BaseOffset + UtfOffset)); i++)
-                {
-                    this.CurrentStringXor *= this.Increment;
-                    this.CurrentUtfStringOffset++;
-
-                    encryptedByte = (byte)fs.ReadByte();
-                    decryptedByte = (byte)(encryptedByte ^ this.CurrentStringXor);
+                    encryptedByte = (byte) fs.ReadByte();
+                    decryptedByte = (byte) (encryptedByte ^ CurrentStringXor);
 
                     if (decryptedByte == 0)
-                    {
                         break;
-                    }
                     else
-                    {
                         asciiVal.Append(Convert.ToChar(decryptedByte));
-                    }                    
                 }
             }
             else
             {
                 asciiVal.Append(ParseFile.ReadAsciiString(fs, BaseOffset + UtfOffset));
             }
-            
+
             return asciiVal.ToString();
         }
 
         public byte ReadByte(FileStream fs, long BaseOffset, long UtfOffset)
         {
-            return this.GetBytes(fs, BaseOffset, 1, UtfOffset)[0];
+            return GetBytes(fs, BaseOffset, 1, UtfOffset)[0];
         }
 
-        public SByte ReadSByte(FileStream fs, long BaseOffset, long UtfOffset)
+        public sbyte ReadSByte(FileStream fs, long BaseOffset, long UtfOffset)
         {
-            return (SByte)this.GetBytes(fs, BaseOffset, 1, UtfOffset)[0];
+            return (sbyte) GetBytes(fs, BaseOffset, 1, UtfOffset)[0];
         }
 
         public ushort ReadUshort(FileStream fs, long BaseOffset, long UtfOffset)
         {
-            byte[] temp = this.GetBytes(fs, BaseOffset, 2, UtfOffset);
+            var temp = GetBytes(fs, BaseOffset, 2, UtfOffset);
 
-            if (BitConverter.IsLittleEndian)
-            {
-                Array.Reverse(temp);
-            }
+            if (BitConverter.IsLittleEndian) Array.Reverse(temp);
             return BitConverter.ToUInt16(temp, 0);
         }
 
         public short ReadShort(FileStream fs, long BaseOffset, long UtfOffset)
         {
-            byte[] temp = this.GetBytes(fs, BaseOffset, 2, UtfOffset);
+            var temp = GetBytes(fs, BaseOffset, 2, UtfOffset);
 
-            if (BitConverter.IsLittleEndian)
-            {
-                Array.Reverse(temp);
-            }
+            if (BitConverter.IsLittleEndian) Array.Reverse(temp);
             return BitConverter.ToInt16(temp, 0);
         }
 
         public uint ReadUint(FileStream fs, long BaseOffset, long UtfOffset)
         {
-            byte[] temp = this.GetBytes(fs, BaseOffset, 4, UtfOffset);
+            var temp = GetBytes(fs, BaseOffset, 4, UtfOffset);
 
-            if (BitConverter.IsLittleEndian)
-            {
-                Array.Reverse(temp);
-            }
+            if (BitConverter.IsLittleEndian) Array.Reverse(temp);
             return BitConverter.ToUInt32(temp, 0);
         }
 
         public int ReadInt(FileStream fs, long BaseOffset, long UtfOffset)
         {
-            byte[] temp = this.GetBytes(fs, BaseOffset, 4, UtfOffset);
+            var temp = GetBytes(fs, BaseOffset, 4, UtfOffset);
 
-            if (BitConverter.IsLittleEndian)
-            {
-                Array.Reverse(temp);
-            }
+            if (BitConverter.IsLittleEndian) Array.Reverse(temp);
             return BitConverter.ToInt32(temp, 0);
         }
 
         public ulong ReadUlong(FileStream fs, long BaseOffset, long UtfOffset)
         {
-            byte[] temp = this.GetBytes(fs, BaseOffset, 8, UtfOffset);
+            var temp = GetBytes(fs, BaseOffset, 8, UtfOffset);
 
-            if (BitConverter.IsLittleEndian)
-            {
-                Array.Reverse(temp);
-            }
+            if (BitConverter.IsLittleEndian) Array.Reverse(temp);
             return BitConverter.ToUInt64(temp, 0);
         }
 
         public float ReadFloat(FileStream fs, long BaseOffset, long UtfOffset)
         {
-            byte[] temp = this.GetBytes(fs, BaseOffset, 4, UtfOffset);
+            var temp = GetBytes(fs, BaseOffset, 4, UtfOffset);
 
-            if (BitConverter.IsLittleEndian)
-            {
-                Array.Reverse(temp);
-            }
+            if (BitConverter.IsLittleEndian) Array.Reverse(temp);
             return BitConverter.ToSingle(temp, 0);
         }
     }

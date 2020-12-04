@@ -10,7 +10,7 @@ using System.IO;
 using System.Security.Cryptography;
 
 namespace VGMToolbox.util
-{              
+{
     /// <summary>
     /// Class containing static functions related to checksum generation.
     /// </summary>
@@ -23,7 +23,7 @@ namespace VGMToolbox.util
         /// <returns>String containing the hexidecimal representation of the MD5 of the input stream.</returns>
         public static string GetMd5OfFullFile(FileStream stream)
         {
-            MD5CryptoServiceProvider hashMd5 = new MD5CryptoServiceProvider();
+            var hashMd5 = new MD5CryptoServiceProvider();
 
             stream.Seek(0, SeekOrigin.Begin);
             hashMd5.ComputeHash(stream);
@@ -32,7 +32,7 @@ namespace VGMToolbox.util
 
         public static byte[] GetSha1(byte[] dataBlock)
         {
-            SHA1CryptoServiceProvider sha1Hash = new SHA1CryptoServiceProvider();
+            var sha1Hash = new SHA1CryptoServiceProvider();
             sha1Hash.ComputeHash(dataBlock);
             return sha1Hash.Hash;
         }
@@ -44,7 +44,7 @@ namespace VGMToolbox.util
         /// <returns>String containing the hexidecimal representation of the SHA1 of the input stream.</returns>
         public static string GetSha1OfFullFile(FileStream stream)
         {
-            SHA1CryptoServiceProvider sha1Hash = new SHA1CryptoServiceProvider();
+            var sha1Hash = new SHA1CryptoServiceProvider();
 
             stream.Seek(0, SeekOrigin.Begin);
             sha1Hash.ComputeHash(stream);
@@ -58,7 +58,7 @@ namespace VGMToolbox.util
         /// <returns>String containing the hexidecimal representation of the SHA-512 of the input stream.</returns>
         public static string GetSha512OfFullFile(FileStream stream)
         {
-            SHA512CryptoServiceProvider sha512 = new SHA512CryptoServiceProvider();
+            var sha512 = new SHA512CryptoServiceProvider();
 
             stream.Seek(0, SeekOrigin.Begin);
             sha512.ComputeHash(stream);
