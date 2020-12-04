@@ -11,18 +11,11 @@ namespace VGMToolbox.util
     /// <summary>
     ///     Class for Parsing Files.
     /// </summary>
-    public sealed class ParseFile
+    public static class ParseFile
     {
         public const string LogFileName = "vgmt_extraction_log.txt";
         public const string SnakeBiteBatchFileName = "vgmt_extraction_log.bat";
         public const string VirtualFileSystemExtractionFolder = "vgmt_vfs_cut";
-
-        /// <summary>
-        ///     Prevents a default instance of the ParseFile class from being created.
-        /// </summary>
-        private ParseFile()
-        {
-        }
 
         /// <summary>
         ///     Extract a section from the incoming byte array.

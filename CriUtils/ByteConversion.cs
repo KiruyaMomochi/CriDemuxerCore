@@ -7,7 +7,7 @@ namespace VGMToolbox.util
     /// <summary>
     ///     Class containing static text conversion functions.
     /// </summary>
-    public sealed class ByteConversion
+    public static class ByteConversion
     {
         /// <summary>
         ///     Codepage value for Shift JIS (Jp)
@@ -23,10 +23,6 @@ namespace VGMToolbox.util
         ///     Codepage value for OEM DOS
         /// </summary>
         public const int CodePageOEM = 437;
-
-        private ByteConversion()
-        {
-        }
 
         /// <summary>
         ///     Get string from bytes.

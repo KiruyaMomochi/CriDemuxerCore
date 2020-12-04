@@ -287,7 +287,7 @@
     /// <summary>
     ///     Class containing universal constants.
     /// </summary>
-    public sealed class Constants
+    public static class Constants
     {
         /// <summary>
         ///     Chunk size to use when reading from files.  Used to grab maximum buffer
@@ -325,8 +325,5 @@
         public static readonly byte[] NullByteArray = {0x00};
 
         // empty constructor
-        private Constants()
-        {
-        }
     }
 }

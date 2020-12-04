@@ -7,12 +7,8 @@ using System.Text;
 
 namespace VGMToolbox.util
 {
-    public sealed class FileUtil
+    public static class FileUtil
     {
-        private FileUtil()
-        {
-        }
-
         /// <summary>
         ///     Reads data into a complete array, throwing an EndOfStreamException
         ///     if the stream runs out of data first, or if an IOException

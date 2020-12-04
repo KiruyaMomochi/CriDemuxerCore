@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\UsmUtils\UsmUtils.csproj" />
+      <ProjectReference Include="..\CriUtils\CriUtils.csproj" />
     </ItemGroup>
 
 </Project>
