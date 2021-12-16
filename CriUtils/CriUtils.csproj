@@ -1,9 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <RootNamespace>vgmtutil</RootNamespace>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <PackageId>Kyaru.CriDemuxer.CriUtils</PackageId>
+        <Authors>Kiruya Momochi</Authors>
+        <PackageProjectUrl>https://github.com/KiruyaMomochi/CriDemuxerCore</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/KiruyaMomochi/CriDemuxerCore</RepositoryUrl>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <None Include="../LICENSE" Pack="true" PackagePath=""/>
+    </ItemGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

@@ -23,7 +23,7 @@ namespace VGMToolbox.util
         /// <returns>String containing the hexidecimal representation of the MD5 of the input stream.</returns>
         public static string GetMd5OfFullFile(FileStream stream)
         {
-            var hashMd5 = new MD5CryptoServiceProvider();
+            var hashMd5 = MD5.Create();
 
             stream.Seek(0, SeekOrigin.Begin);
             hashMd5.ComputeHash(stream);
@@ -32,7 +32,7 @@ namespace VGMToolbox.util
 
         public static byte[] GetSha1(byte[] dataBlock)
         {
-            var sha1Hash = new SHA1CryptoServiceProvider();
+            var sha1Hash = SHA1.Create();
             sha1Hash.ComputeHash(dataBlock);
             return sha1Hash.Hash;
         }
@@ -44,7 +44,7 @@ namespace VGMToolbox.util
         /// <returns>String containing the hexidecimal representation of the SHA1 of the input stream.</returns>
         public static string GetSha1OfFullFile(FileStream stream)
         {
-            var sha1Hash = new SHA1CryptoServiceProvider();
+            var sha1Hash = SHA1.Create();
 
             stream.Seek(0, SeekOrigin.Begin);
             sha1Hash.ComputeHash(stream);
@@ -58,7 +58,7 @@ namespace VGMToolbox.util
         /// <returns>String containing the hexidecimal representation of the SHA-512 of the input stream.</returns>
         public static string GetSha512OfFullFile(FileStream stream)
         {
-            var sha512 = new SHA512CryptoServiceProvider();
+            var sha512 = SHA512.Create();
 
             stream.Seek(0, SeekOrigin.Begin);
             sha512.ComputeHash(stream);
